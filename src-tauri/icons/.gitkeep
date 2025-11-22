@@ -1,0 +1,5 @@
+# Icons directory
+# To generate icons, place a 1024x1024 PNG image in this directory named "icon.png"
+# Then run: npm run tauri icon
+# Or use the Tauri CLI: npx tauri icon path/to/your/icon.png
+

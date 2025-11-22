@@ -1,0 +1,14 @@
+C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\deps\serde-a6ab5710e10d3332.d: C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\build\serde-1feef63a8cf3ae3c\out/private.rs
+
+C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\deps\libserde-a6ab5710e10d3332.rlib: C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\build\serde-1feef63a8cf3ae3c\out/private.rs
+
+C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\deps\libserde-a6ab5710e10d3332.rmeta: C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\build\serde-1feef63a8cf3ae3c\out/private.rs
+
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\build\serde-1feef63a8cf3ae3c\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\Users\\Meyo\\Documents\\GitHub\\tarkov_tracker\\src-tauri\\target\\release\\build\\serde-1feef63a8cf3ae3c\\out

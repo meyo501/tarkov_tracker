@@ -1,0 +1,11 @@
+C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\deps\tauri_runtime-37461b50fdd62042.d: C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\lib.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\dpi.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\monitor.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\webview.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\window.rs
+
+C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\deps\libtauri_runtime-37461b50fdd62042.rlib: C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\lib.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\dpi.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\monitor.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\webview.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\window.rs
+
+C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\deps\libtauri_runtime-37461b50fdd62042.rmeta: C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\lib.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\dpi.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\monitor.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\webview.rs C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\window.rs
+
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\lib.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\dpi.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\monitor.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\webview.rs:
+C:\Users\Meyo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tauri-runtime-2.9.1\src\window.rs:

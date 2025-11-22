@@ -1,0 +1,2 @@
+cargo:rustc-link-search=native=C:\Users\Meyo\Documents\GitHub\tarkov_tracker\src-tauri\target\release\build\webview2-com-sys-4b431915ed8d75cb\out\x64
+cargo:rustc-link-lib=advapi32
