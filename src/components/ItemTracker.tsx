@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Check, Package } from 'lucide-react';
+import { Plus, Trash2, Check, Package, Download, Upload } from 'lucide-react';
 import { generateId } from '../lib/storage';
 
 interface Item {
@@ -23,6 +23,7 @@ export default function ItemTracker() {
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const autocompleteRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadItems();
@@ -129,19 +130,158 @@ export default function ItemTracker() {
     setShowAutocomplete(false);
   };
 
+  const exportToJSON = () => {
+    const foundItems: FoundItem[] = JSON.parse(localStorage.getItem('tarkov_history') || '[]');
+    const exportData = {
+      items: items,
+      history: foundItems,
+      exported_at: new Date().toISOString(),
+    };
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tarkov-tracker-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const importedData = JSON.parse(content);
+
+        // Handle both old format (just array) and new format (object with items and history)
+        let importedItems: Item[] = [];
+        let importedHistory: FoundItem[] = [];
+
+        if (Array.isArray(importedData)) {
+          // Old format: just an array of items
+          importedItems = importedData;
+        } else if (importedData.items && Array.isArray(importedData.items)) {
+          // New format: object with items and history
+          importedItems = importedData.items;
+          if (importedData.history && Array.isArray(importedData.history)) {
+            importedHistory = importedData.history;
+          }
+        } else {
+          alert('Invalid file format. Please import a valid JSON file.');
+          return;
+        }
+
+        // Validate items structure
+        const validItems = importedItems.filter(
+          (item: any) => item && typeof item.name === 'string' && typeof item.quantity_needed === 'number'
+        );
+
+        // Validate history structure
+        const validHistory = importedHistory.filter(
+          (item: any) => item && typeof item.item_name === 'string' && typeof item.quantity === 'number'
+        );
+
+        if (validItems.length === 0 && validHistory.length === 0) {
+          alert('No valid data found in the file.');
+          return;
+        }
+
+        // Ask user if they want to replace or merge
+        const replace = window.confirm(
+          `Found ${validItems.length} items and ${validHistory.length} history entries.\n\n` +
+          'Click OK to replace current data, or Cancel to merge with existing data.'
+        );
+
+        if (replace) {
+          // Replace existing data
+          saveItems(validItems);
+          localStorage.setItem('tarkov_history', JSON.stringify(validHistory));
+        } else {
+          // Merge with existing data
+          const existingItems = items;
+          const existingHistory: FoundItem[] = JSON.parse(localStorage.getItem('tarkov_history') || '[]');
+
+          // Merge items: combine quantities for same names, add new items
+          const mergedItems = [...existingItems];
+          validItems.forEach((importedItem) => {
+            const existingIndex = mergedItems.findIndex((item) => item.name === importedItem.name);
+            if (existingIndex >= 0) {
+              mergedItems[existingIndex].quantity_needed += importedItem.quantity_needed;
+            } else {
+              mergedItems.push(importedItem);
+            }
+          });
+          saveItems(mergedItems);
+
+          // Merge history: combine entries
+          const mergedHistory = [...existingHistory, ...validHistory];
+          localStorage.setItem('tarkov_history', JSON.stringify(mergedHistory));
+        }
+
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+
+        alert('Import completed successfully!');
+      } catch (error) {
+        alert('Error reading file. Please make sure it is a valid JSON file.');
+        console.error('Import error:', error);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="flex-1 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-white">Items to Find</h2>
           {!isAdding && (
-            <button
-              onClick={() => setIsAdding(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Add Item
-            </button>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileImport}
+                className="hidden"
+              />
+              <button
+                onClick={handleImportClick}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+                title="Import items and history from JSON"
+              >
+                <Upload className="w-5 h-5" />
+                Import JSON
+              </button>
+              {(items.length > 0 || JSON.parse(localStorage.getItem('tarkov_history') || '[]').length > 0) && (
+                <button
+                  onClick={exportToJSON}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                  title="Export items and history to JSON"
+                >
+                  <Download className="w-5 h-5" />
+                  Export JSON
+                </button>
+              )}
+              <button
+                onClick={() => setIsAdding(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                Add Item
+              </button>
+            </div>
           )}
         </div>
 
@@ -236,7 +376,7 @@ export default function ItemTracker() {
                     title="Increase quantity by 1"
                   >
                     <Plus className="w-4 h-4" />
-                    
+                    +1
                   </button>
                   <button
                     onClick={() => markAsFound(item)}
