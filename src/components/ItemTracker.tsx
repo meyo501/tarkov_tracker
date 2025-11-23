@@ -417,11 +417,10 @@ export default function ItemTracker() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => increaseQuantity(item.id)}
-                    className="flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     title="Increase quantity by 1"
                   >
                     <Plus className="w-4 h-4" />
-                    +1
                   </button>
                   <button
                     onClick={() => markAsFound(item)}
