@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Check, Package, Download, Upload } from 'lucide-react';
+import { Plus, Trash2, Check, Package, Download, Upload, AlertCircle } from 'lucide-react';
 import { generateId } from '../lib/storage';
 
 interface Item {
   id: string;
   name: string;
   quantity_needed: number;
+  isHighPriority?: boolean;
 }
 
 interface FoundItem {
@@ -44,7 +45,13 @@ export default function ItemTracker() {
 
   const loadItems = () => {
     const stored = localStorage.getItem('tarkov_items');
-    setItems(stored ? JSON.parse(stored) : []);
+    const loadedItems = stored ? JSON.parse(stored) : [];
+    // Ensure backward compatibility: add isHighPriority if missing
+    const itemsWithPriority = loadedItems.map((item: Item) => ({
+      ...item,
+      isHighPriority: item.isHighPriority ?? false,
+    }));
+    setItems(itemsWithPriority);
   };
 
   const saveItems = (newItems: Item[]) => {
@@ -59,6 +66,7 @@ export default function ItemTracker() {
       id: generateId(),
       name: newItemName.trim(),
       quantity_needed: newItemQuantity,
+      isHighPriority: false,
     };
 
     saveItems([newItem, ...items]);
@@ -77,6 +85,23 @@ export default function ItemTracker() {
       i.id === id ? { ...i, quantity_needed: i.quantity_needed + 1 } : i
     );
     saveItems(updated);
+  };
+
+  const togglePriority = (id: string) => {
+    const updated = items.map((i) =>
+      i.id === id ? { ...i, isHighPriority: !(i.isHighPriority ?? false) } : i
+    );
+    saveItems(updated);
+  };
+
+  const getSortedItems = (): Item[] => {
+    return [...items].sort((a, b) => {
+      const aPriority = a.isHighPriority ?? false;
+      const bPriority = b.isHighPriority ?? false;
+      if (aPriority && !bPriority) return -1;
+      if (!aPriority && bPriority) return 1;
+      return 0;
+    });
   };
 
   const markAsFound = (item: Item) => {
@@ -182,9 +207,14 @@ export default function ItemTracker() {
         }
 
         // Validate items structure
-        const validItems = importedItems.filter(
-          (item: any) => item && typeof item.name === 'string' && typeof item.quantity_needed === 'number'
-        );
+        const validItems = importedItems
+          .filter(
+            (item: any) => item && typeof item.name === 'string' && typeof item.quantity_needed === 'number'
+          )
+          .map((item: any) => ({
+            ...item,
+            isHighPriority: item.isHighPriority ?? false,
+          }));
 
         // Validate history structure
         const validHistory = importedHistory.filter(
@@ -356,18 +386,33 @@ export default function ItemTracker() {
           </div>
         ) : (
           <div className="space-y-3">
-            {items.map((item) => (
+            {getSortedItems().map((item) => (
               <div
                 key={item.id}
-                className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex items-center justify-between hover:border-gray-600 transition-colors"
+                className={`bg-gray-800 rounded-lg p-4 border flex items-center justify-between hover:border-gray-600 transition-colors ${
+                  item.isHighPriority ? 'border-yellow-500 border-2' : 'border-gray-700'
+                }`}
               >
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium text-white">
-                    {item.name}
-                  </h3>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Quantity needed: {item.quantity_needed}
-                  </p>
+                <div className="flex items-center gap-3 flex-1">
+                  <button
+                    onClick={() => togglePriority(item.id)}
+                    className={`p-1 rounded transition-colors ${
+                      item.isHighPriority
+                        ? 'text-yellow-500 hover:text-yellow-400'
+                        : 'text-gray-500 hover:text-gray-400'
+                    }`}
+                    title={item.isHighPriority ? 'Remove high priority' : 'Mark as high priority'}
+                  >
+                    <AlertCircle className="w-5 h-5" fill={item.isHighPriority ? 'currentColor' : 'none'} />
+                  </button>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-white">
+                      {item.name}
+                    </h3>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Quantity needed: {item.quantity_needed}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
