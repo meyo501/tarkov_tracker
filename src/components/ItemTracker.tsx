@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Check, Package, Download, Upload, AlertCircle } from 'lucide-react';
+import { Plus, Minus, Trash2, Check, Package, Download, Upload, AlertCircle, Tag, X } from 'lucide-react';
 import { generateId } from '../lib/storage';
 
 interface Item {
@@ -7,6 +7,7 @@ interface Item {
   name: string;
   quantity_needed: number;
   isHighPriority?: boolean;
+  tags?: string[];
 }
 
 interface FoundItem {
@@ -20,11 +21,15 @@ export default function ItemTracker() {
   const [items, setItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState(1);
+  const [newItemTags, setNewItemTags] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [editingTagsId, setEditingTagsId] = useState<string | null>(null);
+  const [editingTagsValue, setEditingTagsValue] = useState('');
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const autocompleteRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const tagInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadItems();
@@ -43,15 +48,22 @@ export default function ItemTracker() {
     };
   }, []);
 
+  useEffect(() => {
+    if (editingTagsId && tagInputRef.current) {
+      tagInputRef.current.focus();
+    }
+  }, [editingTagsId]);
+
   const loadItems = () => {
     const stored = localStorage.getItem('tarkov_items');
     const loadedItems = stored ? JSON.parse(stored) : [];
-    // Ensure backward compatibility: add isHighPriority if missing
-    const itemsWithPriority = loadedItems.map((item: Item) => ({
+    // Ensure backward compatibility: add isHighPriority and tags if missing
+    const itemsWithDefaults = loadedItems.map((item: Item) => ({
       ...item,
       isHighPriority: item.isHighPriority ?? false,
+      tags: item.tags ?? [],
     }));
-    setItems(itemsWithPriority);
+    setItems(itemsWithDefaults);
   };
 
   const saveItems = (newItems: Item[]) => {
@@ -59,19 +71,30 @@ export default function ItemTracker() {
     setItems(newItems);
   };
 
+  const parseTags = (tagString: string): string[] => {
+    return tagString
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0)
+      .map((tag) => tag.toLowerCase());
+  };
+
   const addItem = () => {
     if (!newItemName.trim()) return;
 
+    const tags = parseTags(newItemTags);
     const newItem: Item = {
       id: generateId(),
       name: newItemName.trim(),
       quantity_needed: newItemQuantity,
       isHighPriority: false,
+      tags: tags,
     };
 
     saveItems([newItem, ...items]);
     setNewItemName('');
     setNewItemQuantity(1);
+    setNewItemTags('');
     setIsAdding(false);
     setShowAutocomplete(false);
   };
@@ -84,6 +107,17 @@ export default function ItemTracker() {
     const updated = items.map((i) =>
       i.id === id ? { ...i, quantity_needed: i.quantity_needed + 1 } : i
     );
+    saveItems(updated);
+  };
+
+  const decreaseQuantity = (id: string) => {
+    const updated = items.map((i) => {
+      if (i.id === id) {
+        const newQuantity = Math.max(1, i.quantity_needed - 1);
+        return { ...i, quantity_needed: newQuantity };
+      }
+      return i;
+    });
     saveItems(updated);
   };
 
@@ -133,6 +167,32 @@ export default function ItemTracker() {
     const allNames = [...currentItemNames, ...historyItemNames];
     const distinctNames = Array.from(new Set(allNames));
     return distinctNames.sort();
+  };
+
+  const getAllTags = (): string[] => {
+    const allTags = items.flatMap((item) => item.tags || []);
+    const distinctTags = Array.from(new Set(allTags));
+    return distinctTags.sort();
+  };
+
+  const startEditingTags = (item: Item) => {
+    setEditingTagsId(item.id);
+    setEditingTagsValue((item.tags || []).join(', '));
+  };
+
+  const saveTags = (id: string) => {
+    const tags = parseTags(editingTagsValue);
+    const updated = items.map((i) =>
+      i.id === id ? { ...i, tags: tags } : i
+    );
+    saveItems(updated);
+    setEditingTagsId(null);
+    setEditingTagsValue('');
+  };
+
+  const cancelEditingTags = () => {
+    setEditingTagsId(null);
+    setEditingTagsValue('');
   };
 
   const handleItemNameChange = (value: string) => {
@@ -214,6 +274,7 @@ export default function ItemTracker() {
           .map((item: any) => ({
             ...item,
             isHighPriority: item.isHighPriority ?? false,
+            tags: Array.isArray(item.tags) ? item.tags : [],
           }));
 
         // Validate history structure
@@ -320,58 +381,111 @@ export default function ItemTracker() {
             <h3 className="text-lg font-semibold text-white mb-4">
               Add New Item
             </h3>
-            <div className="flex gap-4">
-              <div className="flex-1 relative" ref={autocompleteRef}>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="flex-1 relative" ref={autocompleteRef}>
+                  <input
+                    type="text"
+                    value={newItemName}
+                    onChange={(e) => handleItemNameChange(e.target.value)}
+                    placeholder="Item name"
+                    className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onKeyPress={(e) => e.key === 'Enter' && addItem()}
+                    autoFocus
+                  />
+                  {showAutocomplete && autocompleteSuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {autocompleteSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => selectAutocompleteItem(suggestion)}
+                          className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="number"
+                  value={newItemQuantity}
+                  onChange={(e) =>
+                    setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                  }
+                  min="1"
+                  className="w-24 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addItem}
+                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                >
+                  Add
+                </button>
+                <button
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewItemName('');
+                    setNewItemQuantity(1);
+                    setNewItemTags('');
+                    setShowAutocomplete(false);
+                  }}
+                  className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-1">
+                  <Tag className="w-4 h-4 text-gray-400" />
+                  <label className="text-sm text-gray-400">Tags (comma-separated)</label>
+                </div>
                 <input
                   type="text"
-                  value={newItemName}
-                  onChange={(e) => handleItemNameChange(e.target.value)}
-                  placeholder="Item name"
+                  value={newItemTags}
+                  onChange={(e) => setNewItemTags(e.target.value)}
+                  placeholder="e.g., quest, hideout, trader"
                   className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onKeyPress={(e) => e.key === 'Enter' && addItem()}
-                  autoFocus
                 />
-                {showAutocomplete && autocompleteSuggestions.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {autocompleteSuggestions.map((suggestion, index) => (
-                      <button
+                {newItemTags && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {parseTags(newItemTags).map((tag, index) => (
+                      <span
                         key={index}
-                        type="button"
-                        onClick={() => selectAutocompleteItem(suggestion)}
-                        className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full"
                       >
-                        {suggestion}
-                      </button>
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 )}
+                {getAllTags().length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500 mb-1">Existing tags:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {getAllTags().slice(0, 10).map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => {
+                            const currentTags = parseTags(newItemTags);
+                            if (!currentTags.includes(tag)) {
+                              setNewItemTags(
+                                newItemTags ? `${newItemTags}, ${tag}` : tag
+                              );
+                            }
+                          }}
+                          className="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-colors"
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-              <input
-                type="number"
-                value={newItemQuantity}
-                onChange={(e) =>
-                  setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                }
-                min="1"
-                className="w-24 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={addItem}
-                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-              >
-                Add
-              </button>
-              <button
-                onClick={() => {
-                  setIsAdding(false);
-                  setNewItemName('');
-                  setNewItemQuantity(1);
-                  setShowAutocomplete(false);
-                }}
-                className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         )}
@@ -412,9 +526,106 @@ export default function ItemTracker() {
                     <p className="text-sm text-gray-400 mt-1">
                       Quantity needed: {item.quantity_needed}
                     </p>
+                    {editingTagsId === item.id ? (
+                      <div className="mt-3 mb-2 p-3 bg-gray-900 rounded-lg border border-gray-700 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <input
+                            ref={tagInputRef}
+                            type="text"
+                            value={editingTagsValue}
+                            onChange={(e) => setEditingTagsValue(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') saveTags(item.id);
+                              if (e.key === 'Escape') cancelEditingTags();
+                            }}
+                            placeholder="Tags (comma-separated)"
+                            className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => saveTags(item.id)}
+                            className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors whitespace-nowrap"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={cancelEditingTags}
+                            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded transition-colors whitespace-nowrap"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                        {editingTagsValue && (
+                          <div className="flex flex-wrap gap-2">
+                            {parseTags(editingTagsValue).map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {getAllTags().length > 0 && (
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">Click to add existing tags:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {getAllTags()
+                                .filter((tag) => !parseTags(editingTagsValue).includes(tag))
+                                .slice(0, 10)
+                                .map((tag) => (
+                                  <button
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => {
+                                      const currentTags = parseTags(editingTagsValue);
+                                      if (!currentTags.includes(tag)) {
+                                        setEditingTagsValue(
+                                          editingTagsValue ? `${editingTagsValue}, ${tag}` : tag
+                                        );
+                                      }
+                                    }}
+                                    className="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-colors"
+                                  >
+                                    {tag}
+                                  </button>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        {(item.tags || []).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        <button
+                          onClick={() => startEditingTags(item)}
+                          className="flex items-center gap-1 px-2 py-1 text-gray-400 hover:text-gray-300 text-xs transition-colors hover:bg-gray-700 rounded"
+                          title="Add or edit tags"
+                        >
+                          <Tag className="w-3 h-3" />
+                          <span>{(item.tags || []).length === 0 ? 'Add tags' : 'Edit tags'}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => decreaseQuantity(item.id)}
+                    className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Decrease quantity by 1"
+                    disabled={item.quantity_needed <= 1}
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => increaseQuantity(item.id)}
                     className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
