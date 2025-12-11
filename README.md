@@ -13,6 +13,9 @@ A desktop application built with Tauri and React for tracking items you need to 
 - **Export/Import**: Backup and restore your data with JSON export/import functionality
 - **Local Storage**: All data is stored locally on your device
 - **Modern UI**: Dark theme interface built with Tailwind CSS
+  
+  <img width="998" height="757" alt="Screenshot_7" src="https://github.com/user-attachments/assets/7a9fdfc9-fe87-4e25-aa30-d62567d77a99" />
+
 
 ## Prerequisites
 
