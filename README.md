@@ -1,6 +1,6 @@
 # Tarkov Tracker
 
-A desktop application built with Tauri and React for tracking items you need to find in Escape from Tarko, ARC Raider or any other loot based extraction shooter. Keep track of quest items, hideout materials, and trader requirements with an intuitive interface.
+A desktop application built with Tauri and React for tracking items you need to find in Escape from Tarkov, ARC Raiders or any other loot based extraction shooter. Keep track of quest items, hideout materials, and trader requirements with an intuitive interface.
 
 ## Features
 
