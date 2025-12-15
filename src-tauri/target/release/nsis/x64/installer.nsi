@@ -30,8 +30,8 @@ ${StrLoc}
 
 !define MANUFACTURER "tarkovtracker"
 !define PRODUCTNAME "Tarkov Tracker"
-!define VERSION "0.1.0"
-!define VERSIONWITHBUILD "0.1.0.0"
+!define VERSION "1.0.0"
+!define VERSIONWITHBUILD "1.0.0.0"
 !define HOMEPAGE ""
 !define INSTALLMODE "currentUser"
 !define LICENSE ""

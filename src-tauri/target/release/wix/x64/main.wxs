@@ -18,7 +18,7 @@
             UpgradeCode="d734895d-7ba1-5de9-9047-6a6f0b632068"
             Language="!(loc.TauriLanguage)"
             Manufacturer="tarkovtracker"
-            Version="0.1.0">
+            Version="1.0.0">
 
         <Package Id="*"
                  Keywords="Installer"
